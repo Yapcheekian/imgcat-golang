@@ -1,11 +1,11 @@
 package main
 
 import (
-	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
 
+	"github.com/Yapcheekian/imgcat-golang/imgcat"
 	"github.com/pkg/errors"
 )
 
@@ -29,16 +29,9 @@ func cat(path string) error {
 	}
 	defer f.Close()
 
-	fmt.Printf("\033]1337;File=inline=1:")
-	wc := base64.NewEncoder(base64.StdEncoding, os.Stdout)
-	_, err = io.Copy(wc, f)
-	if err != nil {
-		return errors.Wrap(err, "could not encode image")
+	wc := imgcat.NewWriter(os.Stdout)
+	if _, err := io.Copy(wc, f); err != nil {
+		return err
 	}
-	if err := wc.Close(); err != nil {
-		return errors.Wrap(err, "could not close base64 encoder")
-	}
-	fmt.Printf("\a\n")
-
-	return nil
+	return wc.Close()
 }
